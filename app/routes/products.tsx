@@ -5,6 +5,7 @@ import { Header } from "../components/Header";
 import { ProductCard } from "../components/ProductCard";
 import { LoadingGrid } from "../components/Loading";
 import { ErrorMessage } from "../components/ErrorMessage";
+import { useDebounce } from "@uidotdev/usehooks";
 
 export function meta() {
   return [
@@ -18,7 +19,7 @@ export default function Products() {
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
     undefined
   );
-
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
   // Fetch categories
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -33,10 +34,10 @@ export default function Products() {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["products", searchQuery, selectedCategory],
+    queryKey: ["products", debouncedSearchQuery, selectedCategory],
     queryFn: () =>
       api.getProducts({
-        title: searchQuery || undefined,
+        title: debouncedSearchQuery || undefined,
         categoryId: selectedCategory,
         limit: 50,
       }),
@@ -59,7 +60,7 @@ export default function Products() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 bg-white"
               />
             </div>
 
@@ -72,7 +73,7 @@ export default function Products() {
                     e.target.value ? Number(e.target.value) : undefined
                   )
                 }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-gray-900 bg-white"
               >
                 <option value="">All Categories</option>
                 {categories?.map((category) => (
